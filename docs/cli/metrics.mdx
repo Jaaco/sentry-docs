@@ -1,0 +1,72 @@
+---
+title: "Metrics"
+sidebar_order: 5
+description: "Learn how Sentry's command line interface can be used for sending metrics."
+---
+Metrics help you track and visualize the data points you care about, making it easier to monitor your application's health and identify issues.
+Learn more about [Metrics](/product/metrics).
+
+## Requirements
+- [Install](/product/cli/installation) Sentry CLI (min v2.32.0).
+
+## Configuration
+
+Sentry CLI uses your project's DSN to authorize sending metrics. To set it up, export the `SENTRY_DSN` environment variable:
+
+<SignInNote />
+```bash
+export SENTRY_DSN=___PUBLIC_DSN___
+```
+
+Alternatively, you can add it to your `~/.sentryclirc` config file:
+
+```ini {filename:~/.sentryclirc}
+[auth]
+dsn = ___PUBLIC_DSN___
+```
+
+## Sending metrics
+When emitting a metric that doesn't exist, the metric will be created for you. If it already exists, it will be updated.
+All metric types support custom units and tags provided with the `-u` and `-t` parameters:
+
+```bash
+sentry-cli send-metric increment -n "MyMetric" -u "MyUnit" -t "role:user","version:3"
+```
+
+
+The metric's name, unit, and tags will undergo normalization to only include supported characters.
+Learn more about [Supported Characters](/product/metrics/#supported-characters) and [Metric Tag Lengths](/product/metrics/#metric-tags-length).
+
+### Counters
+To increment a counter metric by one, you only need to provide the `--name` or `-n` parameter.
+A counter metric can also be incremented by a custom value using the `-v` parameter:
+
+```bash
+sentry-cli send-metric increment -n "MyMetric" -v 3.14
+```
+
+
+### Gauges
+To emit a gauge metric, you need to provide the name and value:
+
+```bash
+sentry-cli send-metric gauge -n "MyMetric" -v 3.14
+```
+
+### Distributions
+Similar to gauges, you just need to provide the name and value to emit a distribution metric:
+
+```bash
+sentry-cli send-metric distribution -n "MyMetric" -v 3.14
+```
+
+### Sets
+To emit a set metric, you need to provide the value type in addition to the name and value.
+The value type, specified by the `--vt` parameter, must be either `string` or `int`.
+Because strings are hashed while integers are not, specifying the value type allows you to accurately
+update the same set metric both from the CLI and the SDKs.
+
+
+```
+sentry-cli send-metric set -n "MyMetric" -v 3 --vt "int"
+```
